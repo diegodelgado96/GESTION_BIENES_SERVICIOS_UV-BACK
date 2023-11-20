@@ -34,7 +34,7 @@ export const getUser =  async (req, res) => {
 
 export const createUser = async (req, res) => {
   try {
-    const {idUsuario, Nombres, codigo, correo, telefono, rol} = req.body
+    const {idUsuario, Nombres, codigo, correo, telefono, rol, password} = req.body
     const [rows] = await pool.query('INSERT INTO usuarios VALUES (?,?,?,?,?,?)', [idUsuario, Nombres, codigo, correo, telefono, rol]);
     res.send({
       id: rows.insertId,
@@ -48,7 +48,7 @@ export const createUser = async (req, res) => {
   } 
   catch(error) {
     return res.status(500).json({
-      message: 'Somethng goes wrong'
+      message: 'Somethng goes wrong' + error
     })
   }
 }
