@@ -31,7 +31,7 @@ USE `SI_TESIS` ;
 -- Table `SI_TESIS`.`Usuarios`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `SI_TESIS`.`Usuarios` (
-  `idUsuario` INT NOT NULL,
+  `idUsuario` VARCHAR(45) NOT NULL,
   `Nombres` VARCHAR(45) NOT NULL,
   `codigo` INT NOT NULL,
   `correoInstitucional` VARCHAR(45) NOT NULL,
@@ -45,9 +45,9 @@ ENGINE = InnoDB;
 -- Table `SI_TESIS`.`Login`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `SI_TESIS`.`Login` (
-  `idLogin` INT UNSIGNED NOT NULL,
+  `idLogin` VARCHAR(45) NOT NULL,
   `password` VARCHAR(45) NOT NULL,
-  `Usuarios_idUsuario` INT NOT NULL,
+  `Usuarios_idUsuario` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`idLogin`),
   CONSTRAINT `fk_Login_Usuarios`
     FOREIGN KEY (`Usuarios_idUsuario`)
@@ -65,9 +65,10 @@ CREATE INDEX `fk_Login_Usuarios_idx` ON `SI_TESIS`.`Login` (`Usuarios_idUsuario`
 -- Table `SI_TESIS`.`Proveedores`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `SI_TESIS`.`Proveedores` (
-  `idProveedor` INT UNSIGNED NOT NULL,
+  `idProveedor` VARCHAR(45) NOT NULL,
   `tipoProveedoor` ENUM('NATURAL', 'EMPRESA') NOT NULL,
   `tipoIdentificacion` ENUM('RUT', 'NIT', 'CC') NOT NULL,
+  `identifiicacion` INT NOT NULL,
   `digito` INT NOT NULL,
   `nombreTitular` VARCHAR(45) NOT NULL,
   `nombreEmpresa` VARCHAR(45) NULL,
@@ -89,7 +90,7 @@ CREATE UNIQUE INDEX `idProveedores_UNIQUE` ON `SI_TESIS`.`Proveedores` (`idProve
 -- Table `SI_TESIS`.`Acciones`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `SI_TESIS`.`Acciones` (
-  `idAccion` INT NOT NULL,
+  `idAccion` VARCHAR(45) NOT NULL,
   `accion` VARCHAR(45) NOT NULL,
   `estado` ENUM('RECHAZADO', 'APROBADO', 'PENDIENTE') NOT NULL,
   `fechaCreacion` DATETIME NOT NULL,
@@ -105,7 +106,7 @@ CREATE UNIQUE INDEX `idAcciones_Reporte_UNIQUE` ON `SI_TESIS`.`Acciones` (`idAcc
 -- Table `SI_TESIS`.`Reporte_Infraestructura`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `SI_TESIS`.`Reporte_Infraestructura` (
-  `idReporte` INT UNSIGNED NOT NULL,
+  `idReporte` VARCHAR(45) NOT NULL,
   `edificio` ENUM('PRINCIPE', 'VICTORIA', 'VILLA') NOT NULL,
   `ubicacion` VARCHAR(45) NOT NULL,
   `descripcionLugar` LONGTEXT NOT NULL,
@@ -118,9 +119,9 @@ CREATE TABLE IF NOT EXISTS `SI_TESIS`.`Reporte_Infraestructura` (
   `fechaCreacion` DATETIME NOT NULL,
   `etapa` ENUM('EN PROCESO', 'TERMINADO', 'CANCELADO') NOT NULL,
   `ultimaModificacion` DATETIME NOT NULL,
-  `Proveedores_idProveedor` INT UNSIGNED NOT NULL,
-  `Usuarios_idUsuario` INT NOT NULL,
-  `Acciones_idAccion` INT NOT NULL,
+  `Proveedores_idProveedor` VARCHAR(45) NOT NULL,
+  `Usuarios_idUsuario` VARCHAR(45) NOT NULL,
+  `Acciones_idAccion` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`idReporte`),
   CONSTRAINT `fk_Reporte_Infraestructura_Proveedores1`
     FOREIGN KEY (`Proveedores_idProveedor`)
@@ -154,7 +155,7 @@ CREATE INDEX `fk_Reporte_Infraestructura_Acciones1_idx` ON `SI_TESIS`.`Reporte_I
 -- Table `SI_TESIS`.`Solicitud_Bienes_Servicios`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `SI_TESIS`.`Solicitud_Bienes_Servicios` (
-  `idSolicitud` INT NOT NULL,
+  `idSolicitud` VARCHAR(45) NOT NULL,
   `tipoSolicitud` ENUM('BIENES', 'SERVICIOS') NOT NULL,
   `productoSolicitado` VARCHAR(100) NOT NULL,
   `descripcionSolicitud` LONGTEXT NOT NULL,
@@ -165,9 +166,9 @@ CREATE TABLE IF NOT EXISTS `SI_TESIS`.`Solicitud_Bienes_Servicios` (
   `linksProducto` LONGTEXT NOT NULL,
   `fechaCreacion` DATETIME NOT NULL,
   `ultimaModificacion` DATETIME NOT NULL,
-  `Proveedores_idProveedor` INT UNSIGNED NOT NULL,
-  `Acciones_idAccion` INT NOT NULL,
-  `Usuarios_idUsuario` INT NOT NULL,
+  `Proveedores_idProveedor` VARCHAR(45) NOT NULL,
+  `Acciones_idAccion` VARCHAR(45) NOT NULL,
+  `Usuarios_idUsuario` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`idSolicitud`),
   CONSTRAINT `fk_Solicitud_Bienes_Servicios_Proveedores1`
     FOREIGN KEY (`Proveedores_idProveedor`)

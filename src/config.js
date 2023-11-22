@@ -1,4 +1,4 @@
-import { config } from "dotenv";
+import { config } from 'dotenv'
 
 config()
 
@@ -10,3 +10,4 @@ export const DB_PORT = process.env.DB_PORT
 export const DB_DATABASE = process.env.DB_DATABASE
 export const SECRECT_TOKEN = process.env.SECRECT_TOKEN
 export const GENSALT = process.env.GENSALT
+export const CLIENT = process.env.CLIENT
