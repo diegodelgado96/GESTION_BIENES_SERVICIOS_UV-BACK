@@ -1,7 +1,6 @@
 import bcrypt from 'bcrypt'
 import  JsonWebToken from 'jsonwebtoken'
 import pool from '../db.js'
-import { genId } from './verifyToken.controller.js'
 import { GENSALT, SECRECT_TOKEN } from '../config.js'
 import { v4 } from 'uuid'
 
@@ -52,7 +51,6 @@ export const signup = async (req, res) => {
 
 export const signin = async (req, res) => {
   try {
-    console.log(req.body)
     const {email, password} = req.body
     const [user] = await pool.query('SELECT password, u.* FROM si_tesis.usuarios as u LEFT JOIN si_tesis.login ON Usuarios_idUsuario = idUsuario WHERE correoInstitucional = ?', email)
     if(user[0] == undefined) {
@@ -67,8 +65,7 @@ export const signin = async (req, res) => {
 
     const userWithoutPassword = { ...user[0] }
     delete userWithoutPassword.password
-
-    const token = await JsonWebToken.sign({id: user[0].idUsuario}, SECRECT_TOKEN, {
+    const token = await JsonWebToken.sign({id: user[0].idUsuario, rol: user[0].rol}, SECRECT_TOKEN, {
       expiresIn: 60*10
     })
 
@@ -77,7 +74,6 @@ export const signin = async (req, res) => {
     res.json(userWithoutPassword)
   }
   catch (error) {
-    console.log(error)
     return res.status(500).json({
       message: 'Somethng goes wrong' + error
     })

@@ -32,6 +32,22 @@ export const getUser =  async (req, res) => {
   }
 }
 
+export const getRolUser =  async (id) => {
+  try {
+    const [rows] = await pool.query('SELECT rol FROM usuarios WHERE idUsuario = ?', id)
+    console.log({id})
+    if(rows.length == 0)
+    {
+      throw Error('User not found')
+    }
+    return rows[0]
+  } 
+  catch(error) {
+    console.log(error)
+    throw Error( 'Somethng goes wrong' )
+  }
+}
+
 export const createUser = async (req, res) => {
   try {
     const {idUsuario, Nombres, codigo, correo, telefono, rol} = req.body
