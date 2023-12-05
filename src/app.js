@@ -24,6 +24,12 @@ app.use('/api/', reportRoutes)
 app.use('/api/', providerRoutes)
 app.use('/api/', requestRoutes)
 
+app.use('/is', (req, res) => {
+  res.status(200).json({
+    message: 'connected correctly'
+  })
+})
+
 app.use((req, res) => {
   res.status(404).json({
     message: 'endpoint not found'

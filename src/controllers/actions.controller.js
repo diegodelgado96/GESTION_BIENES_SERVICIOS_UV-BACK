@@ -2,6 +2,7 @@ import pool from '../db.js'
 import { getRolUser } from './user.controller.js'
 import JsonWebToken from 'jsonwebtoken'
 import { SECRECT_TOKEN } from '../config.js'
+import { v4 } from 'uuid'
 
 export const getActions = async (req, res) => {
   try {
@@ -11,13 +12,15 @@ export const getActions = async (req, res) => {
     let [actionsReport] = await pool.query( 
       `SELECT a.*, ticket, edificio, ubicacion FROM acciones as a JOIN reporte_infraestructura 
       ON  Reporte_Infraestructura_idReporte = idReporte 
-      WHERE Proveedores_idProveedor = ?;`, 
+      WHERE Proveedores_idProveedor = ?
+      ORDER BY fechaCreacion ASC;`, 
       [idProvider]) 
       
     let [actionsSol] = await pool.query( 
       `SELECT a.*, tipoSolicitud, productoSolicitado, ticket FROM acciones as a
       JOIN solicitud_bienes_servicios ON  Solicitud_Bienes_Servicios_idSolicitud = idSolicitud
-      WHERE Proveedores_idProveedor = ?;`, 
+      WHERE Proveedores_idProveedor = ?
+      ORDER BY fechaCreacion ASC;`, 
       [idProvider]) 
 
     const { rol } = await getRolUser(idRequest)
@@ -95,38 +98,28 @@ export const newAction = async (req, res) => {
     const idRequest = req.headers['idrequest']
     const idAccion = v4()
     const fecha = new Date()
-    const { estado, accion, descripcionAccion } = req.body
+    const { estado, accion, descripcionAccion, idSolicitud, idReporte } = req.body
 
     const [rows] = await pool.query(
       `INSERT INTO acciones 
         ( 
-          idSolicitud, 
-          tipoSolicitud, 
-          productoSolicitado, 
-          descripcionSolicitud, 
-          fechaEntrega, 
-          urgencia, 
-          especificaciones, 
-          linksProducto, 
+          idAccion,
+          accion,
+          estado,
           fechaCreacion,
-          ultimaModificacion,
-          Usuarios_idUsuario,
-          ticket
+          descripcionAccion,
+          Reporte_Infraestructura_idReporte,
+          Solicitud_Bienes_Servicios_idSolicitud
         ) 
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+        VALUES (?,?,?,?,?,?,?)`,
       [
-        idSolicitud,
-        tipo,
-        productoSolicitado,
-        descripcionSolicitud,
-        fechaEntrega,
-        urgencia,
-        especificaciones,
-        linksProducto,
-        fecha,
-        fecha,
-        idRequest,
-        ticket
+        idAccion,
+        accion,
+        estado,
+        new Date(),
+        descripcionAccion,
+        idReporte,
+        idSolicitud
       ])
 
     const rol = await getRolUser(idRequest)
@@ -136,13 +129,13 @@ export const newAction = async (req, res) => {
     })
 
     res.send({
-      ticket,
+      action: { estado, accion, descripcionAccion, idSolicitud, idReporte },
       token
     })
   }
   catch (error) {
     return res.status(500).json({
-      message: 'Something goes wrong' + error
+      message: 'Something goes wrong' + error 
     })
   }
 }

@@ -105,11 +105,11 @@ export const createProviders = async (req, res) => {
 
 export const updateProvider = async (req, res) => {
   try {
+    console.log(req.body)
     const id = req.params.idProvider
     const idRequest = req.headers['idrequest']
     const {
       idProveedor,
-      digito,
       nombreTitular,
       nombreEmpresa,
       direccion,
@@ -137,7 +137,6 @@ export const updateProvider = async (req, res) => {
 
 
     const [result] = await pool.query(`UPDATE proveedores SET 
-      digito =IFNULL(?, digito),
       nombreTitular =IFNULL(?, nombreTitular),
       nombreEmpresa =IFNULL(?, nombreEmpresa),
       direccion =IFNULL(?, direccion),
@@ -152,7 +151,6 @@ export const updateProvider = async (req, res) => {
       
       `,
     [
-      digito,
       nombreTitular,
       nombreEmpresa,
       direccion,
@@ -161,9 +159,10 @@ export const updateProvider = async (req, res) => {
       fechaInicioContrato,
       fechaFinContrato,
       descripcionServicios,
-      idProveedor
+      id
     ])
     const [rows] = await pool.query('SELECT * FROM proveedores WHERE idProveedor = ?', idProveedor)
+    console.log(rows)
 
     const rol = getRolUser(idRequest)
     const token = await JsonWebToken.sign({ id: idRequest, rol: rol.rol }, SECRECT_TOKEN, {

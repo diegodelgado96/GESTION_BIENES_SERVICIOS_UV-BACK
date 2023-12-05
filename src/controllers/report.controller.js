@@ -1,7 +1,7 @@
 import pool from '../db.js'
 import fs from 'fs'
 import JsonWebToken from 'jsonwebtoken'
-import { DOCUMENT_PATH, REPOR_PATH } from '../config.js'
+import { DOCUMENT_PATH, REPOR_PATH, REQUEST_PATH } from '../config.js'
 import { genTicket } from './tools.controller.js'
 import { getRolUser } from './user.controller.js'
 import { v4 } from 'uuid'
@@ -61,15 +61,34 @@ export const getReport = async (req, res) => {
 
     let [rows] = []
     let [proveedores] = []
+    let tipo = ''
 
     if (rol === 'ADMIN') {
-      [rows] = await pool.query('SELECT * FROM reporte_infraestructura WHERE ticket = ?', ticket);
+      [rows] = await pool.query('SELECT * FROM reporte_infraestructura WHERE ticket = ?', ticket)
+      if (rows.length === 0) {
+        [rows] = await pool.query('SELECT * FROM solicitud_bienes_servicios WHERE ticket = ?', ticket)
+        tipo = 'Solicitud'
+      }
+      else {
+        tipo = 'Reporte'
+      }
+
       [proveedores] = await pool.query('SELECT * FROM proveedores')
     }
     else {
       [rows] = await pool.query(
         'SELECT * FROM reporte_infraestructura WHERE ticket = ? AND Usuarios_idUsuario = ?',
         [ticket, idRequest])
+
+      if (rows.length === 0) {
+        [rows] = await pool.query(
+          'SELECT * FROM solicitud_bienes_servicios WHERE ticket = ? AND Usuarios_idUsuario = ?',
+          [ticket, idRequest])
+        tipo = 'Solicitud'
+      }
+      else {
+        tipo = 'Reporte'
+      }
     }
 
     if (rows.length == 0) {
@@ -78,8 +97,8 @@ export const getReport = async (req, res) => {
       })
     }
     const [user] = await pool.query('SELECT * FROM usuarios WHERE idUsuario = ?', rows[0].Usuarios_idUsuario)
-
     const data = rows[0]
+    data.tipo = tipo
     data.allProveedores = proveedores
     data.usuario = user[0]
 
@@ -88,26 +107,28 @@ export const getReport = async (req, res) => {
       data.proveedor = proveedor[0]
     }
 
+    let idQuery = tipo === 'Reporte' ? data.idReporte : data.idSolicitud 
     const [acciones] = await pool.query(
-      'SELECT * FROM acciones WHERE Reporte_Infraestructura_idReporte = ? OR Solicitud_Bienes_Servicios_idSolicitud = ?',
-      [data.idReporte, data.idReporte]
+      'SELECT * FROM acciones WHERE Reporte_Infraestructura_idReporte = ? OR Solicitud_Bienes_Servicios_idSolicitud = ? ORDER BY fechaCreacion ASC',
+      [idQuery, idQuery]
     )
 
     data.acciones = acciones
 
-    const url = DOCUMENT_PATH + ticket
+    const url = tipo === 'Reporte' ? DOCUMENT_PATH + ticket : REQUEST_PATH + ticket
 
     const images = []
-    const archivos = await fs.promises.readdir(url)
-
-    for (const archivo of archivos) {
-      const contenido = await fs.promises.readFile(url + '/' + archivo, 'utf8')
-      images.push({ nombre: archivo, contenido })
-    }
-
     let documento = ''
 
     try {
+      const archivos = await fs.promises.readdir(url)
+
+      for (const archivo of archivos) {
+        const contenido = await fs.promises.readFile(url + '/' + archivo, 'utf8')
+        images.push({ nombre: archivo, contenido })
+      }
+
+
       documento = await fs.promises.readFile(REPOR_PATH + ticket + '.txt', 'utf8')
     } catch (error) {
       documento = ''
@@ -212,7 +233,7 @@ export const updateReport = async (req, res) => {
 export const addDoc = (req, res) => {
   try {
     const ticket = req.params.ticket
-    const {doc} = req.body
+    const { doc } = req.body
 
     fs.mkdir(REPOR_PATH, { recursive: true }, (err) => {
       if (err) {
@@ -226,7 +247,7 @@ export const addDoc = (req, res) => {
       }
     })
 
-    res.json({doc})
+    res.json({ doc })
   }
   catch (error) {
     return res.status(500).json({

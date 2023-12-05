@@ -100,12 +100,78 @@ export const getAll = async (req, res) => {
     })
 
     const obj = {data: [...reports, ...request], token}
-    console.log(obj)
     res.send(obj)
   }
   catch (error) {
     return res.status(500).json({
       message: 'Something goes wrong' + error
+    })
+  }
+}
+
+export const updateRequest = async (req, res) => {
+  try {
+    const id = req.params.idRequest
+    const idRequest = req.headers['idrequest']
+    const {
+      tipoSolicitud,
+      productoSolicitado,
+      descripcionSolicitud,
+      fechaEntrega,
+      urgencia,
+      especificaciones,
+      linksProducto,
+      ultimaModificacion,
+      estado,
+      Proveedores_idProveedor,
+    } = req.body
+
+    const [result] = await pool.query(`UPDATE solicitud_bienes_servicios SET 
+      tipoSolicitud = IFNULL(?, tipoSolicitud),
+      productoSolicitado = IFNULL(?, productoSolicitado),
+      descripcionSolicitud = IFNULL(?, descripcionSolicitud),
+      fechaEntrega = IFNULL(?, fechaEntrega),
+      urgencia = IFNULL(?, urgencia),
+      especificaciones = IFNULL(?, especificaciones),
+      linksProducto = IFNULL(?, linksProducto),
+      ultimaModificacion = IFNULL(?, ultimaModificacion),
+      estado = IFNULL(?, estado),
+      Proveedores_idProveedor = IFNULL(?, Proveedores_idProveedor)
+
+      WHERE idSolicitud=?`,
+    [
+      tipoSolicitud,
+      productoSolicitado,
+      descripcionSolicitud,
+      new Date(),
+      urgencia,
+      especificaciones,
+      linksProducto,
+      ultimaModificacion,
+      estado,
+      Proveedores_idProveedor,
+      id
+    ])
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        message: 'User not found'
+      })
+    }
+
+    const [rows] = await pool.query('SELECT * FROM solicitud_bienes_servicios WHERE idSolicitud = ?', id)
+
+    const rol = getRolUser(idRequest)
+    const token = await JsonWebToken.sign({ id: idRequest, rol: rol.rol }, SECRECT_TOKEN, {
+      expiresIn: 60 * 10
+    })
+    const data = rows[0]
+    data.token = token
+
+    res.json(data)
+  }
+  catch (error) {
+    return res.status(500).json({
+      message: 'Somethng goes wrong'
     })
   }
 }
