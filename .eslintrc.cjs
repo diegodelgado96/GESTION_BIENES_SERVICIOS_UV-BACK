@@ -1,0 +1,41 @@
+module.exports = {
+  'env': {
+    'node': true,
+    'commonjs': true,
+    'es2021': true
+  },
+  'extends': 'plugin:jest/recommended',
+  'overrides': [
+    {
+      'env': {
+        'node': true
+      },
+      'files': [
+        '.eslintrc.{js,cjs}'
+      ],
+      'parserOptions': {
+        'sourceType': 'script'
+      }
+    }
+  ],
+  'parserOptions': {
+    'ecmaVersion': 'latest',
+    'sourceType': 'module'
+  },
+  'plugins': ['jest'],
+  'rules': {
+    'indent': [
+      'error',
+      2,
+    ],
+    'linebreak-style': 'off',
+    'quotes': [
+      'error',
+      'single'
+    ],
+    'semi': [
+      'error',
+      'never'
+    ]
+  }
+}
